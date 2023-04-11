@@ -5,3 +5,6 @@
 build
 
 bin
+
+.classpath
+.settings
