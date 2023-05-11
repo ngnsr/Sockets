@@ -21,7 +21,7 @@ public class Client {
     private static PrintWriter out;
     private static BufferedReader in;
 
-    private static PrintWriter logger;
+    private static PrintWriter clientLogger;
     private static PrintWriter primesLogger;
     private static DateTimeFormatter date;
 
@@ -77,9 +77,9 @@ public class Client {
     public static void initLoggers() {
         ensureLogsDirExists();
 
-        logger = initLogger(PRIMES_LOG_PATH);
+        clientLogger = initLogger(CLIENT_LOG_PATH);
 
-        primesLogger = initLogger(CLIENT_LOG_PATH);
+        primesLogger = initLogger(PRIMES_LOG_PATH);
         // need for client logger
         date = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     }
@@ -249,7 +249,6 @@ public class Client {
                 LOCAL_ADDRESS = client.getLocalAddress();
                 conected = true;
             } catch (final IOException e) {
-                // conected = false;
                 System.err.println(e.getMessage());
             }
         }
@@ -298,7 +297,7 @@ public class Client {
     }
 
     private static void log(String command) {
-        logger.printf("[ %s | %s | %s ] : %s\n", date.format(LocalDateTime.now()), LOCAL_ADDRESS, HOST_ADDRESS,
+        clientLogger.printf("[ %s | %s | %s ] : %s\n", date.format(LocalDateTime.now()), LOCAL_ADDRESS, HOST_ADDRESS,
                 command);
     }
 }
