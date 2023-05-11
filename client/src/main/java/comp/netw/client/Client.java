@@ -170,7 +170,6 @@ public class Client {
             }
 
             if (isNumberValid(stringNumber)) {
-                // out.printf("%s %s %s\n", Commands.Check.getLength(), Commands.Check.name(), stringNumber);
                 out.println(Commands.Check.getLength() + 2 + stringNumber.length() + " " + Commands.Check.name() + " " + stringNumber);
                 log(Commands.Check.name());
                 try {
