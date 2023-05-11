@@ -14,12 +14,13 @@ git clone https://github.com/ngnsr/Sockets
 ````
 
 ## Compile
+cd Sockets
 ./gradlew build
 
 ## Start server
 
 ````bash
-java -jar ./server/build/libs/server.jar
+java -jar ./server/build/libs/server.jar &
 ````
 
 ## Start client
