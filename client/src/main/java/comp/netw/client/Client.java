@@ -235,8 +235,8 @@ public class Client {
 
     private static void initAndStartSocketConnection() {
         boolean conected = false;
-        client = new Socket();
         while (!conected) {
+            client = new Socket();
             try {
                 final String host = readConsoleHost();
                 final int port = (int) readConsoleNumber("Enter port number.\n > ", 1025, 65_535);
@@ -249,7 +249,7 @@ public class Client {
                 LOCAL_ADDRESS = client.getLocalAddress();
                 conected = true;
             } catch (final IOException e) {
-                conected = false;
+                // conected = false;
                 System.err.println(e.getMessage());
             }
         }
