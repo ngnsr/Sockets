@@ -11,6 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class Server {
@@ -126,11 +127,16 @@ public class Server {
             try (
                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
-                while ((request = in.readLine()) != null) {
+                do {
+                    try {
+                        request = in.readLine();
+                    } catch (NoSuchElementException e) {
+                        return;
+                    }
                     executeRuquest(request.trim(), out, in);
-                }
-            } catch (final Exception e) {
-            }
+                } while (request != null);
+
+            } catch (final Exception e) { }
         }
 
         private void executeRuquest(final String request, final PrintWriter out, final BufferedReader in) {
@@ -144,11 +150,15 @@ public class Server {
             } else if (request.matches("\\d+\\s+[a-zA-Z]+(\\s+[+-]?\\d+)?")) {
                 final String[] args = request.split("\\s+");
 
-                // int too large
-                requestLength = Integer.parseInt(args[0]);
+                try {
+                    requestLength = Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+                    printWrongRequestMsg(out);
+                    return;
+                }
+
                 command = args[1];
 
-                // validate command and exec
                 if (args.length == 2) {
                     if (command.equalsIgnoreCase(Commands.Who.name())) {
                         executeCommandWho(out);
@@ -156,12 +166,23 @@ public class Server {
                         executeCommandGenerateAndCheck(out);
                     }
                 } else if (args.length == 3 && command.equalsIgnoreCase(Commands.Check.name())) {
-                    number = Long.parseLong(args[2]);
+                    try {
+                        number = Long.parseLong(args[2]);
+                    } catch (NumberFormatException e) {
+                        printWrongRequestMsg(out);
+                        return;
+                    }
                     executeCommandCheck(out, number);
+                }else{
+                    printWrongRequestMsg(out);
                 }
             } else {
-                out.println("Wrong request!");
+                printWrongRequestMsg(out);
             }
+        }
+
+        private void printWrongRequestMsg(final PrintWriter out){
+            out.println("Wrong request!");
         }
 
         private void executeCommandWho(final PrintWriter out) {
@@ -177,7 +198,6 @@ public class Server {
                 updateStat(n, isPrime);
                 sb.append(String.format("%s %s\n", n, isPrime ? NUMBER_IS_PRIME_MSG : NUMBER_IN_NOT_PRIME_MSG));
             }
-
             out.printf(sb.toString());
             log(Commands.GenerateAndCheck.name());
         }
@@ -205,10 +225,16 @@ public class Server {
         }
 
         private boolean isPrime(final long n) {
-            if (n <= 0 || n == 1) {
+            if (n <= 1) {
                 return false;
             }
-            for (long i = 2; i < (long) Math.sqrt(n) + 1; i++) {
+
+            if (n % 2 == 0) {
+                return (n == 2);
+            }
+
+            long upperBound = (long)Math.sqrt(n) + 1;
+            for (long i = 3; i < upperBound; i+=2) {
                 if (n % i == 0)
                     return false;
             }
@@ -216,8 +242,9 @@ public class Server {
         }
 
         private void log(String command) {
-            logger.printf("[ %s | %s | %s ] : %s\n", date.format(LocalDateTime.now()), LOCAL_ADDRESS, HOST_ADDRESS,
-                    command);
+            String logMessage = String.format("[ %s | %s | %s ] : %s\n", date.format(LocalDateTime.now()), LOCAL_ADDRESS, HOST_ADDRESS, command);
+            logger.printf(logMessage);
+            System.out.print(logMessage);
         }
     }
 }
