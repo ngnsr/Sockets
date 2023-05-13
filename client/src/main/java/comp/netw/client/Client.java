@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Client {
@@ -60,6 +61,12 @@ public class Client {
 
         initAndStartSocketConnection();
 
+        startMenu();
+
+        closeConnection();
+    }
+
+    public static void startMenu(){
         while (true) {
             final int mode = (int) chooseMode();
             if (mode == -1 ) {
@@ -70,8 +77,6 @@ public class Client {
             }
             makeRequest(mode);
         }
-
-        closeConnection();
     }
 
     public static void initLoggers() {
@@ -159,10 +164,14 @@ public class Client {
         System.out.println("type \'exit\' to exit");
         final String message = "Enter number: \n > ";
 
-        String stringNumber;
+        String stringNumber = "";
         while (true) {
             System.out.print(message);
-            stringNumber = consoleScanner.nextLine();
+            try {
+                stringNumber = consoleScanner.nextLine();
+            } catch (NoSuchElementException e) {
+                System.exit(0);
+            }
             System.out.println();
 
             if (stringNumber.equals("exit")) {
@@ -219,7 +228,11 @@ public class Client {
         int n = -1;
         while(n < 1 || n > 3){
             System.out.print(MODE_MSG);
-            in = consoleScanner.nextLine();
+            try {
+                in = consoleScanner.nextLine();
+            } catch (NoSuchElementException e) {
+                System.exit(0);
+            }
             System.out.println();
             if(in.equals("exit")){
                 break;
@@ -270,7 +283,9 @@ public class Client {
             System.out.print(message);
             try {
                 n = Long.parseLong(consoleScanner.nextLine());
-            } catch (final Exception e) {
+            } catch (NoSuchElementException e) {
+                System.exit(0);
+            } catch (final NumberFormatException e) {
                 System.out.println("Try again!");
             }
             System.out.println();
@@ -287,8 +302,8 @@ public class Client {
             System.out.print(message);
             try {
                 host = consoleScanner.nextLine().trim();
-            } catch (final Exception e) {
-                System.out.println("Try again!");
+            } catch (final NoSuchElementException e) {
+                System.exit(0);
             }
             System.out.println();
         } while (!host.matches("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$") && !host.equals("localhost"));
